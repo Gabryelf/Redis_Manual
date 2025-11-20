@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Redis App</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Регистрация пользователя</h1>
+
+        <div id="user-form" style="display: none;">
+            <div class="form-group">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <button onclick="registerUser()" class="btn btn-primary">Зарегистрироваться</button>
+        </div>
+
+        <div id="user-info" style="display: none;">
+            <img src="https://ih1.redbubble.net/image.2563740221.2392/raf,750x1000,075,t,101010:01c5ca27c6.jpg"
+                 alt="User Registered" class="user-image">
+            <p>Пользователь зарегистрирован!</p>
+            <button onclick="deleteUser()" class="btn btn-danger">Удалить данные</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
