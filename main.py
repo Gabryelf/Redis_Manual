@@ -1,16 +1,13 @@
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import redis
-import os
 
 app = FastAPI()
 
-# Подключаем Redis
 redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
-# Монтируем статические файлы
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -29,14 +26,11 @@ async def register_user(request: Request):
     if not username or not email:
         raise HTTPException(status_code=400, detail="Username and email are required")
 
-    # Универсальный способ сохранения в Redis
     user_key = f"user:{username}"
     user_data = {"username": username, "email": email}
 
-    # Удаляем старые данные если есть
     redis_client.delete(user_key)
 
-    # Сохраняем каждое поле отдельно
     for field, value in user_data.items():
         redis_client.hset(user_key, field, value)
 

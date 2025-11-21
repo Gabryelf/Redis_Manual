@@ -108,7 +108,6 @@ function showMessage(text, type) {
     messageDiv.className = `message ${type}`;
     messageDiv.style.display = 'block';
 
-    // Автоматически скрывать сообщение через 5 секунд
     if (type === 'success') {
         setTimeout(clearMessage, 5000);
     }
