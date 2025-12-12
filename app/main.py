@@ -216,7 +216,7 @@ app.redis_client = redis_client
 
 # ============ НАСТРОЙКА ПУТЕЙ ============
 # Создаем статические директории если их нет
-static_dir = Path("static")
+static_dir = Path("app/static")
 static_dir.mkdir(parents=True, exist_ok=True)
 (static_dir / "images").mkdir(exist_ok=True)
 (static_dir / "css").mkdir(exist_ok=True)
@@ -224,7 +224,7 @@ static_dir.mkdir(parents=True, exist_ok=True)
 (static_dir / "avatars").mkdir(exist_ok=True)
 
 # Mount static files and templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # ============ MIDDLEWARE ============
@@ -755,7 +755,7 @@ async def about_page(request: Request):
 # ============ СТАТИЧЕСКИЕ ФАЙЛЫ ============
 @app.get("/images/{filename}")
 async def get_image(filename: str):
-    image_path = Path(f"static/images/{filename}")
+    image_path = Path(f"app/static/images/{filename}")
     if image_path.exists():
         return FileResponse(image_path)
     raise HTTPException(status_code=404, detail="Image not found")
@@ -763,12 +763,12 @@ async def get_image(filename: str):
 
 @app.get("/avatars/{filename}")
 async def get_avatar(filename: str):
-    avatar_path = Path(f"static/avatars/{filename}")
+    avatar_path = Path(f"app/static/avatars/{filename}")
     if avatar_path.exists():
         return FileResponse(avatar_path)
 
     # Если файла нет, возвращаем дефолтный
-    default_path = Path("static/avatars/default.png")
+    default_path = Path("app/static/avatars/default.png")
     if default_path.exists():
         return FileResponse(default_path)
 
@@ -838,7 +838,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 @media (max-width: 768px) { .navbar { flex-direction: column; gap: 1rem; } .nav-links { flex-wrap: wrap; justify-content: center; } .template-grid { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .nav-brand h1 { font-size: 1.5rem; } .btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; } .template-preview { height: 150px; } }"""
 
-    css_file = Path("static/css/style.css")
+    css_file = Path("app/static/css/style.css")
     css_file.parent.mkdir(parents=True, exist_ok=True)
     css_file.write_text(css_content, encoding='utf-8')
 
@@ -884,7 +884,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });"""
 
-    js_file = Path("static/js/main.js")
+    js_file = Path("app/static/js/main.js")
     js_file.parent.mkdir(parents=True, exist_ok=True)
     js_file.write_text(js_content, encoding='utf-8')
 
