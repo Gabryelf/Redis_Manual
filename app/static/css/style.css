@@ -1,0 +1,284 @@
+/* D&D стиль */
+:root {
+    --parchment: #f5e9d4;
+    --ink: #2c1810;
+    --gold: #d4af37;
+    --velvet: #8b0000;
+    --leather: #8b4513;
+    --steel: #708090;
+    --magic: #9370db;
+}
+
+body.medieval-theme {
+    background: url('/static/images/parchment-bg.jpg') repeat;
+    color: var(--ink);
+    font-family: 'MedievalSharp', cursive, serif;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Навигация */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: var(--leather);
+    border-radius: 10px;
+    border: 3px solid var(--gold);
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+}
+
+.nav-brand h1 {
+    color: var(--gold);
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--parchment);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.nav-link:hover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.admin-link {
+    color: var(--magic);
+    font-weight: bold;
+}
+
+/* Кнопки */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: linear-gradient(to bottom, var(--velvet), #6b0000);
+    color: white;
+    border: 2px solid var(--gold);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.4);
+}
+
+.btn-magic {
+    background: linear-gradient(45deg, var(--magic), #6a5acd);
+    color: white;
+    border: 2px solid white;
+    font-size: 1.2em;
+}
+
+.btn-magic:hover {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Девиз дня */
+.daily-motto {
+    margin: 30px 0;
+}
+
+.scroll-parchment {
+    background: url('/static/images/scroll.png') no-repeat center;
+    background-size: contain;
+    padding: 40px 60px;
+    text-align: center;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.motto-text {
+    font-size: 1.5em;
+    font-style: italic;
+    color: var(--ink);
+    margin-top: 10px;
+}
+
+/* Карточки шаблонов */
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.template-card {
+    background: var(--parchment);
+    border: 3px solid var(--leather);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.template-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.template-preview {
+    height: 200px;
+    background: linear-gradient(135deg, #f5e9d4, #e6d8c3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 2px solid var(--leather);
+}
+
+.template-info {
+    padding: 20px;
+}
+
+.template-author {
+    color: var(--steel);
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.template-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.class-badge {
+    background: var(--velvet);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+.modal-content.parchment {
+    background: url('/static/images/parchment-modal.jpg');
+    background-size: cover;
+    margin: 10% auto;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    border: 5px solid var(--gold);
+    border-radius: 15px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--ink);
+}
+
+/* Формы */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--ink);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--leather);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Футер */
+.footer {
+    margin-top: 50px;
+    padding: 20px;
+    text-align: center;
+    border-top: 2px solid var(--leather);
+    color: var(--steel);
+    font-size: 0.9em;
+}
+
+.footer-note {
+    font-size: 0.8em;
+    margin-top: 10px;
+    opacity: 0.7;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .template-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .scroll-parchment {
+        padding: 30px 20px;
+    }
+}
