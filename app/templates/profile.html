@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #ff7b54);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .profile-info {
+            flex-grow: 1;
+        }
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+            display: block;
+        }
+        .section {
+            margin-bottom: 3rem;
+        }
+        .ip-list {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        .ip-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .ip-item:last-child {
+            border-bottom: none;
+        }
+        .danger-zone {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/dashboard" class="nav-link">📊 Мастерская</a>
+                <a href="/editor" class="nav-link">✨ Создать</a>
+                <a href="#" onclick="logout()" class="btn btn-secondary">🚪 Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Заголовок профиля -->
+        <div class="profile-header">
+            <div class="avatar">
+                {{ user.username|first|upper }}
+            </div>
+            <div class="profile-info">
+                <h2>{{ user.username }}</h2>
+                <p style="opacity: 0.8;">{{ user.role|title }} • Участник с {{ user.created_at|default('сегодня') }}</p>
+            </div>
+            <div>
+                <a href="/dashboard" class="btn btn-secondary">← Назад в мастерскую</a>
+            </div>
+        </div>
+
+        <!-- Быстрая статистика -->
+        <div class="profile-stats">
+            <div class="stat-card">
+                <span class="stat-number" id="templates-count">0</span>
+                <span>Шаблонов</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="likes-count">0</span>
+                <span>Лайков</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="collection-count">0</span>
+                <span>В коллекции</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ user_ips|length }}</span>
+                <span>Устройств</span>
+            </div>
+        </div>
+
+        <!-- Настройки профиля -->
+        <div class="section">
+            <h3>⚙️ Настройки профиля</h3>
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 10px; margin-top: 1rem;">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Email:</label>
+                    <input type="email" id="email" value="{{ user.email|default('') }}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Аватар:</label>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        {% for avatar in avatar_list %}
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0f3460, #1a1a2e); display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="changeAvatar('{{ avatar }}')">
+                            {{ avatar|replace('.png', '')|first|upper }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button onclick="updateProfile()" class="btn btn-primary">💾 Сохранить изменения</button>
+            </div>
+        </div>
+
+        <!-- Управление устройствами -->
+        <div class="section">
+            <h3>📱 Мои устройства</h3>
+            <div class="ip-list">
+                {% if user_ips|length > 0 %}
+                    {% for ip in user_ips %}
+                    <div class="ip-item">
+                        <div>
+                            <strong>{{ ip }}</strong>
+                            <div style="font-size: 0.9rem; opacity: 0.7;">Текущее устройство</div>
+                        </div>
+                        {% if user_ips|length > 1 %}
+                        <button onclick="removeIp('{{ ip }}')" class="btn btn-secondary btn-small">Удалить</button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 1rem;">
+                        <p>Нет сохраненных устройств</p>
+                    </div>
+                {% endif %}
+            </div>
+            <div style="margin-top: 1rem;">
+                <p style="opacity: 0.8; font-size: 0.9rem;">
+                    ℹ️ Ваши устройства автоматически запоминаются при входе.
+                    Вы можете удалить старые устройства для безопасности.
+                </p>
+            </div>
+        </div>
+
+        <!-- Опасная зона -->
+        <div class="danger-zone">
+            <h3 style="color: #e74c3c;">⚠️ Опасная зона</h3>
+            <p>Эти действия нельзя отменить. Будьте осторожны!</p>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <button onclick="deleteAccount()" class="btn" style="background: #e74c3c; color: white;">🗑️ Удалить аккаунт</button>
+                <button onclick="clearAllData()" class="btn btn-secondary">🧹 Очистить все данные</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Загружаем статистику
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/users/stats');
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('templates-count').textContent = data.templates_created || 0;
+                    document.getElementById('likes-count').textContent = data.likes_received || 0;
+                    document.getElementById('collection-count').textContent = data.collection_items || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Обновление профиля
+        async function updateProfile() {
+            const email = document.getElementById('email').value;
+
+            try {
+                const response = await fetch('/api/users/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Профиль обновлен!');
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        }
+
+        // Смена аватара
+        async function changeAvatar(avatar) {
+            try {
+                const response = await fetch('/api/users/avatar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ avatar: avatar })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Аватар изменен!');
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Ошибка при смене аватара');
+            }
+        }
+
+        // Удаление IP
+        async function removeIp(ip) {
+            if (!confirm(`Удалить устройство ${ip}? Вы сможете войти с него снова, но оно будет забыто.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/ip/remove', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ip: ip })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Устройство удалено!');
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Ошибка при удалении устройства');
+            }
+        }
+
+        // Удаление аккаунта
+        async function deleteAccount() {
+            if (!confirm('ВНИМАНИЕ! Это действие нельзя отменить. Все ваши данные будут удалены. Продолжить?')) {
+                return;
+            }
+
+            if (!confirm('Вы уверены? Это удалит все ваши шаблоны, коллекцию и данные аккаунта.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/account', {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Аккаунт удален. Перенаправляем на главную...');
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                alert('Ошибка при удалении аккаунта');
+            }
+        }
+
+        // Очистка всех данных
+        async function clearAllData() {
+            if (!confirm('Очистить все ваши шаблоны и коллекцию? Это действие нельзя отменить.')) {
+                return;
+            }
+
+            alert('Функция в разработке...');
+        }
+
+        // Выход
+        function logout() {
+            fetch('/api/users/logout', { method: 'POST' })
+                .then(() => window.location.href = '/');
+        }
+
+        // Загружаем статистику при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

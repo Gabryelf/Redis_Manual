@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/gallery" class="nav-link">🎨 Галерея</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="max-width: 400px; margin: 4rem auto;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2>Добро пожаловать в Таверну!</h2>
+            <p style="opacity: 0.8;">Войдите, чтобы создавать шаблоны персонажей</p>
+        </div>
+
+        {% if message %}
+        <div class="message message-warning">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <form id="auth-form" style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 10px;">
+            <div class="form-group">
+                <label>Имя героя (необязательно):</label>
+                <input type="text" name="username" class="form-input" placeholder="Арагорн, Гэндальф...">
+            </div>
+
+            <div class="form-group">
+                <label>Совиная почта (необязательно):</label>
+                <input type="email" name="email" class="form-input" placeholder="wizard@tower.com">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                🎲 Войти в таверну
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; opacity: 0.7;">
+            Ваше устройство будет запомнено на 30 дней
+        </p>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/" class="btn btn-secondary">← Вернуться на главную</a>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/users/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Перенаправляем пользователя
+                    const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || result.redirect || '/';
+                    window.location.href = redirectUrl;
+                } else {
+                    alert(result.message || 'Ошибка входа');
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .page-info {
+            opacity: 0.8;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                {% if user %}
+                    <a href="/dashboard" class="nav-link">📊 Мастерская</a>
+                    <a href="/editor" class="nav-link">✨ Создать</a>
+                    <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+                {% else %}
+                    <a href="#" onclick="showAuthModal()" class="btn btn-primary">🎲 Войти</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="gallery-header">
+            <h2>🎨 Галерея шаблонов</h2>
+            <div>
+                {% if user %}
+                <a href="/editor" class="btn btn-primary">✨ Создать свой</a>
+                {% else %}
+                <button onclick="showAuthModal()" class="btn btn-primary">🎲 Войти, чтобы создавать</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Класс:</label>
+                <select id="class-filter" onchange="updateFilters()">
+                    <option value="">Все классы</option>
+                    {% for class in classes %}
+                    <option value="{{ class }}" {% if class_filter == class %}selected{% endif %}>{{ class }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Сортировка:</label>
+                <select id="sort-by" onchange="updateFilters()">
+                    <option value="newest" {% if sort_by =='newest' %}selected{% endif %}>Сначала новые</option>
+                    <option value="oldest" {% if sort_by =='oldest' %}selected{% endif %}>Сначала старые</option>
+                    <option value="popular" {% if sort_by =='popular' %}selected{% endif %}>По популярности</option>
+                </select>
+            </div>
+
+            <div style="margin-left: auto;">
+                <span class="page-info">Страница {{ page }} из {{ total_pages }}</span>
+            </div>
+        </div>
+
+        <!-- Сетка шаблонов -->
+        {% if templates|length > 0 %}
+        <div class="template-grid">
+            {% for template in templates %}
+            <div class="template-card">
+                <div class="template-preview">
+                    <div style="text-align: center;">
+                        <h4>{{ template.name|truncate(20) }}</h4>
+                        <p>{{ template.character_class|default('Воин') }}</p>
+                        <p style="font-size: 0.8rem;">❤️ {{ template.likes|default(0) }}</p>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <div class="template-title">{{ template.name|truncate(25) }}</div>
+                    <div class="template-author">Автор: {{ template.owner }}</div>
+                    <div style="margin-top: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/template/{{ template.id }}" class="btn btn-secondary btn-small">👁️ Просмотреть</a>
+                        {% if user %}
+                        <button onclick="collectTemplate('{{ template.id }}')" class="btn btn-secondary btn-small">⭐ В коллекцию</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h3>🦉 Шаблонов пока нет!</h3>
+            <p>Будьте первым, кто создаст шаблон персонажа</p>
+            {% if user %}
+            <a href="/editor" class="btn btn-primary">✨ Создать первый шаблон</a>
+            {% else %}
+            <button onclick="showAuthModal()" class="btn btn-primary">🎲 Войти и создать</button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Пагинация -->
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="?page={{ page - 1 }}{% if class_filter %}&class_filter={{ class_filter }}{% endif %}{% if sort_by != 'newest' %}&sort_by={{ sort_by }}{% endif %}" class="btn btn-secondary">← Назад</a>
+            {% endif %}
+
+            <span>Страница {{ page }} из {{ total_pages }}</span>
+
+            {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}{% if class_filter %}&class_filter={{ class_filter }}{% endif %}{% if sort_by != 'newest' %}&sort_by={{ sort_by }}{% endif %}" class="btn btn-secondary">Далее →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Модальное окно аутентификации -->
+    <div id="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a2e; padding: 2rem; border-radius: 10px; max-width: 400px; width: 90%;">
+            <h2 style="margin-bottom: 1rem;">Вход в Таверну</h2>
+            <form id="auth-form">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Имя героя (необязательно):</label>
+                    <input type="text" name="username" placeholder="Арагорн, Гэндальф..." style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Совиная почта (необязательно):</label>
+                    <input type="email" name="email" placeholder="wizard@tower.com" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">🎲 Войти в таверну</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7; text-align: center;">
+                Ваше устройство будет запомнено на 30 дней
+            </p>
+            <button onclick="closeAuthModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+    </div>
+
+    <script>
+        // Функции для модального окна
+        function showAuthModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        // Обновление фильтров
+        function updateFilters() {
+            const classFilter = document.getElementById('class-filter').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            let url = '?';
+            if (classFilter) url += `class_filter=${classFilter}&`;
+            if (sortBy !== 'newest') url += `sort_by=${sortBy}&`;
+
+            // Убираем последний & если есть
+            if (url.endsWith('&')) url = url.slice(0, -1);
+
+            window.location.href = url || '?';
+        }
+
+        // Добавление в коллекцию
+        async function collectTemplate(templateId) {
+            try {
+                const response = await fetch(`/api/templates/${templateId}/collect`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Добавлено в коллекцию!');
+                } else {
+                    alert(data.message || 'Ошибка');
+                }
+            } catch (error) {
+                alert('Ошибка соединения');
+            }
+        }
+
+        // Обработка формы входа
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/users/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = result.redirect || '/';
+                } else {
+                    alert(result.message || 'Ошибка входа');
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        });
+
+        // Закрытие модального окна при клике вне его
+        document.getElementById('auth-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAuthModal();
+            }
+        });
+    </script>
+</body>
+</html>

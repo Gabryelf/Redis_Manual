@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О проекте - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/gallery" class="nav-link">🎨 Галерея</a>
+                {% if user %}
+                    <a href="/dashboard" class="nav-link">📊 Мастерская</a>
+                    <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+                {% else %}
+                    <a href="#" onclick="showAuthModal()" class="btn btn-primary">🎲 Войти</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container about-content">
+        <h1 style="text-align: center; margin-bottom: 2rem;">О проекте D&D Forge</h1>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Что это такое?</h3>
+            <p>D&D Forge — это онлайн-платформа для создания, хранения и обмена шаблонами персонажей для настольной ролевой игры Dungeons & Dragons 5e.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Почему это удобно?</h3>
+            <p>• Мгновенная авторизация по IP-адресу (не нужно запоминать пароли)<br>
+               • Удобный редактор шаблонов прямо в браузере<br>
+               • Возможность делиться своими работами с сообществом<br>
+               • Коллекция готовых шаблонов от других игроков</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎲</div>
+            <h3>Для кого это?</h3>
+            <p>• Для начинающих игроков, которые хотят быстро создать персонажа<br>
+               • Для опытных мастеров, создающих шаблоны для своих игроков<br>
+               • Для всех любителей D&D, которые хотят вдохновляться работами других</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3>Как начать?</h3>
+            <p>Просто нажмите кнопку "Начать" на главной странице. Вам не нужно регистрироваться — система запомнит ваше устройство автоматически!</p>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a href="/" class="btn btn-primary">🏠 На главную</a>
+                {% if not user %}
+                <button onclick="showAuthModal()" class="btn btn-primary">🎲 Начать сейчас</button>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно аутентификации -->
+    <div id="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a2e; padding: 2rem; border-radius: 10px; max-width: 400px; width: 90%;">
+            <h2 style="margin-bottom: 1rem;">Вход в Таверну</h2>
+            <form id="auth-form">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Имя героя (необязательно):</label>
+                    <input type="text" name="username" placeholder="Арагорн, Гэндальф..." style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Совиная почта (необязательно):</label>
+                    <input type="email" name="email" placeholder="wizard@tower.com" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">🎲 Войти в таверну</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7; text-align: center;">
+                Ваше устройство будет запомнено на 30 дней
+            </p>
+            <button onclick="closeAuthModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+    </div>
+
+    <script>
+        function showAuthModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/users/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = result.redirect || '/';
+                } else {
+                    alert(result.message || 'Ошибка входа');
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        });
+    </script>
+</body>
+</html>

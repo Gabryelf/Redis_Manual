@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if is_edit %}Редактирование{% else %}Создание{% endif %} шаблона - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .editor-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .editor-sidebar {
+            width: 300px;
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .editor-main {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        .preview-area {
+            min-height: 400px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .attribute-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .editor-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/dashboard" class="nav-link">📊 Мастерская</a>
+                <a href="/gallery" class="nav-link">🎨 Галерея</a>
+                <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2>{% if is_edit %}✏️ Редактирование шаблона{% else %}✨ Создание нового шаблона{% endif %}</h2>
+            <a href="/dashboard" class="btn btn-secondary">← Назад в мастерскую</a>
+        </div>
+
+        <div class="editor-container">
+            <!-- Боковая панель настроек -->
+            <div class="editor-sidebar">
+                <div class="form-section">
+                    <h3>📝 Основная информация</h3>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Название шаблона:</label>
+                        <input type="text" id="template-name" value="{{ template.name|default('Новый шаблон персонажа') }}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Описание:</label>
+                        <textarea id="template-description" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white; min-height: 100px;">{{ template.description|default('') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🎭 Класс и раса</h3>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Класс персонажа:</label>
+                        <select id="character-class" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                            <option value="">Выберите класс</option>
+                            {% for class in dnd_classes %}
+                            <option value="{{ class.id }}" {% if template.character_class == class.id %}selected{% endif %}>{{ class.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Раса:</label>
+                        <select id="character-race" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                            <option value="">Выберите расу</option>
+                            {% for race in races %}
+                            <option value="{{ race }}" {% if template.race == race %}selected{% endif %}>{{ race }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Уровень:</label>
+                        <input type="number" id="character-level" value="{{ template.level|default(1) }}" min="1" max="20" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🔒 Настройки видимости</h3>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Кто может видеть этот шаблон:</label>
+                        <select id="template-visibility" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                            <option value="private" {% if template.visibility == 'private' %}selected{% endif %}>Только я (приватный)</option>
+                            <option value="public" {% if template.visibility == 'public' %}selected{% endif %}>Все (публичный)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основная область редактора -->
+            <div class="editor-main">
+                <h3>📋 Атрибуты персонажа</h3>
+
+                <div class="attribute-grid">
+                    <div class="attribute-card">
+                        <label>Сила (STR)</label>
+                        <input type="number" id="attr-str" value="10" min="1" max="20" style="width: 100%; padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.2rem; margin-top: 0.5rem;">
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="mod-str">Модификатор: +0</div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <label>Ловкость (DEX)</label>
+                        <input type="number" id="attr-dex" value="10" min="1" max="20" style="width: 100%; padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.2rem; margin-top: 0.5rem;">
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="mod-dex">Модификатор: +0</div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <label>Телосложение (CON)</label>
+                        <input type="number" id="attr-con" value="10" min="1" max="20" style="width: 100%; padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.2rem; margin-top: 0.5rem;">
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="mod-con">Модификатор: +0</div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <label>Интеллект (INT)</label>
+                        <input type="number" id="attr-int" value="10" min="1" max="20" style="width: 100%; padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.2rem; margin-top: 0.5rem;">
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="mod-int">Модификатор: +0</div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <label>Мудрость (WIS)</label>
+                        <input type="number" id="attr-wis" value="10" min="1" max="20" style="width: 100%; padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.2rem; margin-top: 0.5rem;">
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="mod-wis">Модификатор: +0</div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <label>Харизма (CHA)</label>
+                        <input type="number" id="attr-cha" value="10" min="1" max="20" style="width: 100%; padding: 0.5rem; text-align: center; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1.2rem; margin-top: 0.5rem;">
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="mod-cha">Модификатор: +0</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h3>⚔️ Боевые параметры</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem;">Класс брони (AC):</label>
+                            <input type="number" id="combat-ac" value="10" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem;">Инициатива:</label>
+                            <input type="number" id="combat-initiative" value="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem;">Скорость:</label>
+                            <input type="text" id="combat-speed" value="30 футов" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem;">Максимальные хиты:</label>
+                            <input type="number" id="combat-hp" value="10" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h3>📖 Дополнительная информация</h3>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">История персонажа:</label>
+                        <textarea id="character-backstory" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white; min-height: 150px;" placeholder="Расскажите историю вашего персонажа..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Действия -->
+        <div class="editor-actions">
+            <button onclick="saveTemplate()" class="btn btn-primary">
+                {% if is_edit %}💾 Сохранить изменения{% else %}✨ Создать шаблон{% endif %}
+            </button>
+            <button onclick="previewTemplate()" class="btn btn-secondary">👁️ Предпросмотр</button>
+            <a href="/dashboard" class="btn btn-secondary">❌ Отмена</a>
+        </div>
+    </main>
+
+    <script>
+        // Расчет модификаторов характеристик
+        function calculateModifier(value) {
+            return Math.floor((value - 10) / 2);
+        }
+
+        function updateModifiers() {
+            const attributes = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+
+            attributes.forEach(attr => {
+                const value = parseInt(document.getElementById(`attr-${attr}`).value) || 10;
+                const modifier = calculateModifier(value);
+                const modSign = modifier >= 0 ? '+' : '';
+                document.getElementById(`mod-${attr}`).textContent = `Модификатор: ${modSign}${modifier}`;
+            });
+        }
+
+        // Инициализация модификаторов
+        document.addEventListener('DOMContentLoaded', function() {
+            updateModifiers();
+
+            // Обновляем модификаторы при изменении значений
+            const attributeInputs = document.querySelectorAll('input[id^="attr-"]');
+            attributeInputs.forEach(input => {
+                input.addEventListener('input', updateModifiers);
+            });
+
+            // Загрузка данных существующего шаблона
+            {% if template %}
+                // Загружаем данные из шаблона
+                document.getElementById('template-name').value = "{{ template.name|default('') }}";
+                document.getElementById('template-description').value = "{{ template.description|default('') }}";
+                document.getElementById('character-class').value = "{{ template.character_class|default('') }}";
+                document.getElementById('character-level').value = "{{ template.level|default(1) }}";
+                document.getElementById('template-visibility').value = "{{ template.visibility|default('private') }}";
+
+                // Загружаем атрибуты из content если есть
+                {% if template.content %}
+                    try {
+                        const content = JSON.parse('{{ template.content|tojson|safe }}');
+                        if (content.attributes) {
+                            Object.keys(content.attributes).forEach(attr => {
+                                const input = document.getElementById(`attr-${attr.toLowerCase()}`);
+                                if (input) input.value = content.attributes[attr];
+                            });
+                        }
+                        if (content.combat) {
+                            if (content.combat.ac) document.getElementById('combat-ac').value = content.combat.ac;
+                            if (content.combat.initiative) document.getElementById('combat-initiative').value = content.combat.initiative;
+                            if (content.combat.speed) document.getElementById('combat-speed').value = content.combat.speed;
+                            if (content.combat.hp) document.getElementById('combat-hp').value = content.combat.hp;
+                        }
+                        if (content.backstory) {
+                            document.getElementById('character-backstory').value = content.backstory;
+                        }
+                        updateModifiers();
+                    } catch (e) {
+                        console.error('Error loading template data:', e);
+                    }
+                {% endif %}
+            {% endif %}
+        });
+
+        // Сохранение шаблона
+        async function saveTemplate() {
+            const templateData = {
+                name: document.getElementById('template-name').value,
+                description: document.getElementById('template-description').value,
+                character_class: document.getElementById('character-class').value,
+                level: parseInt(document.getElementById('character-level').value) || 1,
+                race: document.getElementById('character-race').value,
+                visibility: document.getElementById('template-visibility').value,
+                content: {
+                    attributes: {
+                        str: parseInt(document.getElementById('attr-str').value) || 10,
+                        dex: parseInt(document.getElementById('attr-dex').value) || 10,
+                        con: parseInt(document.getElementById('attr-con').value) || 10,
+                        int: parseInt(document.getElementById('attr-int').value) || 10,
+                        wis: parseInt(document.getElementById('attr-wis').value) || 10,
+                        cha: parseInt(document.getElementById('attr-cha').value) || 10
+                    },
+                    combat: {
+                        ac: parseInt(document.getElementById('combat-ac').value) || 10,
+                        initiative: parseInt(document.getElementById('combat-initiative').value) || 0,
+                        speed: document.getElementById('combat-speed').value,
+                        hp: parseInt(document.getElementById('combat-hp').value) || 10
+                    },
+                    backstory: document.getElementById('character-backstory').value
+                }
+            };
+
+            // Проверка обязательных полей
+            if (!templateData.name.trim()) {
+                alert('Введите название шаблона');
+                return;
+            }
+
+            try {
+                const url = {% if is_edit %}'/api/templates/{{ template.id }}'{% else %}'/api/templates'{% endif %};
+                const method = {% if is_edit %}'PUT'{% else %}'POST'{% endif %};
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(templateData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert({% if is_edit %}'Шаблон обновлен!'{% else %}'Шаблон создан!'{% endif %});
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Ошибка: ' + (result.message || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        }
+
+        // Предпросмотр
+        function previewTemplate() {
+            alert('Режим предпросмотра в разработке...');
+            // В будущем здесь будет открытие предпросмотра в новом окне
+        }
+    </script>
+</body>
+</html>

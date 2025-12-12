@@ -1,4 +1,4 @@
-class DnDTemplateEditor {
+   class DnDTemplateEditor {
     constructor() {
         this.templateData = {
             name: "Новый шаблон",

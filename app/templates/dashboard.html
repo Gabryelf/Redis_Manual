@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя мастерская - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .section {
+            margin-bottom: 3rem;
+        }
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+            display: block;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/editor" class="nav-link">✨ Создать</a>
+                <a href="/gallery" class="nav-link">🎨 Галерея</a>
+                <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+                <a href="#" onclick="logout()" class="btn btn-secondary">🚪 Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h2>🏠 Моя мастерская</h2>
+            <a href="/editor" class="btn btn-primary">✨ Создать новый шаблон</a>
+        </div>
+
+        <!-- Быстрая статистика -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <span class="stat-number">{{ user_templates|length }}</span>
+                <span>Мои шаблоны</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ collection_templates|length }}</span>
+                <span>В коллекции</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">0</span>
+                <span>Получено лайков</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">🎲</span>
+                <span>Уровень: 1</span>
+            </div>
+        </div>
+
+        <!-- Мои шаблоны -->
+        <div class="section">
+            <div class="section-title">
+                <h3>📝 Мои шаблоны</h3>
+                {% if user_templates|length > 0 %}
+                <a href="/editor" class="btn btn-secondary">+ Создать еще</a>
+                {% endif %}
+            </div>
+
+            {% if user_templates|length > 0 %}
+            <div class="template-grid">
+                {% for template in user_templates %}
+                <div class="template-card">
+                    <div class="template-preview">
+                        <div style="text-align: center;">
+                            <h4>{{ template.name|truncate(20) }}</h4>
+                            <p>{{ template.character_class|default('Воин') }}</p>
+                            <p style="font-size: 0.8rem;">❤️ {{ template.likes|default(0) }}</p>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <div class="template-title">{{ template.name|truncate(25) }}</div>
+                        <div style="margin-top: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <a href="/template/{{ template.id }}" class="btn btn-secondary btn-small">👁️ Просмотреть</a>
+                            <a href="/editor/{{ template.id }}" class="btn btn-secondary btn-small">✏️ Редактировать</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <h3>🚀 Начните создавать!</h3>
+                <p>У вас еще нет созданных шаблонов</p>
+                <a href="/editor" class="btn btn-primary">✨ Создать первый шаблон</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Коллекция -->
+        <div class="section">
+            <div class="section-title">
+                <h3>⭐ Моя коллекция</h3>
+                {% if collection_templates|length > 0 %}
+                <a href="/gallery" class="btn btn-secondary">Найти еще</a>
+                {% endif %}
+            </div>
+
+            {% if collection_templates|length > 0 %}
+            <div class="template-grid">
+                {% for template in collection_templates %}
+                <div class="template-card">
+                    <div class="template-preview">
+                        <div style="text-align: center;">
+                            <h4>{{ template.name|truncate(20) }}</h4>
+                            <p>{{ template.character_class|default('Воин') }}</p>
+                            <p style="font-size: 0.8rem;">❤️ {{ template.likes|default(0) }}</p>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <div class="template-title">{{ template.name|truncate(25) }}</div>
+                        <div class="template-author">Автор: {{ template.owner|default('Неизвестно') }}</div>
+                        <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                            <a href="/template/{{ template.id }}" class="btn btn-secondary btn-small">👁️ Просмотреть</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <h3>⭐ Начните коллекцию!</h3>
+                <p>Добавляйте понравившиеся шаблоны от других пользователей</p>
+                <a href="/gallery" class="btn btn-primary">🎨 Перейти в галерею</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Недавняя активность -->
+        {% if recent_activity|length > 0 %}
+        <div class="section">
+            <h3>📊 Недавняя активность</h3>
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 10px;">
+                {% for activity in recent_activity %}
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    {{ activity.icon }} {{ activity.description }}
+                    <span style="float: right; font-size: 0.9rem; opacity: 0.7;">{{ activity.time }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+        function logout() {
+            fetch('/api/users/logout', { method: 'POST' })
+                .then(() => window.location.href = '/');
+        }
+    </script>
+</body>
+</html>

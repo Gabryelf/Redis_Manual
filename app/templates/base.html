@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}D&D Template Forge{% endblock %}</title>
+    <meta name="description" content="Создавайте уникальные шаблоны персонажей для Dungeons & Dragons">
+
+    <!-- Мета данные пользователя -->
+    {% if user %}
+    <meta name="user-data" content='{{ user|tojson }}'>
+    {% endif %}
+
+    <!-- Favicon -->
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if user and user.settings and 'theme' in user.settings %}{{ user.settings.theme }}-theme{% else %}dark-theme{% endif %}">
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/" class="logo">
+                    🐉 <span class="logo-text">D&D Forge</span>
+                </a>
+            </div>
+
+            <!-- Кнопка мобильного меню -->
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- Основное меню -->
+            <div class="nav-links" id="nav-links">
+                <a href="/gallery" class="nav-link">🎨 Галерея</a>
+
+                {% if user %}
+                    <a href="/dashboard" class="nav-link">🏠 Мастерская</a>
+                    <a href="/editor" class="nav-link">✨ Создать</a>
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link dropdown-toggle">
+                            👤 {{ user.username }}
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="/profile" class="dropdown-item">👤 Профиль</a>
+                            <a href="/dashboard" class="dropdown-item">📊 Мои шаблоны</a>
+                            <a href="/collection" class="dropdown-item">⭐ Коллекция</a>
+                            <div class="dropdown-divider"></div>
+                            {% if user.role == "admin" or user.role == "moderator" %}
+                            <a href="/admin" class="dropdown-item admin-link">⚡ Админ панель</a>
+                            {% endif %}
+                            <a href="#" class="dropdown-item" onclick="logout()">🚪 Выйти</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="/login" class="nav-link">🔑 Войти</a>
+                    <a href="#" class="btn btn-primary" onclick="showAuthModal()">🎲 Начать</a>
+                {% endif %}
+            </div>
+
+            <!-- Мобильное меню -->
+            <div class="mobile-menu" id="mobile-menu">
+                {% if user %}
+                    <a href="/dashboard" class="mobile-menu-item">🏠 Мастерская</a>
+                    <a href="/editor" class="mobile-menu-item">✨ Создать</a>
+                    <a href="/profile" class="mobile-menu-item">👤 Профиль</a>
+                    <a href="/collection" class="mobile-menu-item">⭐ Коллекция</a>
+                    {% if user.role == "admin" or user.role == "moderator" %}
+                    <a href="/admin" class="mobile-menu-item admin-link">⚡ Админ</a>
+                    {% endif %}
+                    <a href="#" class="mobile-menu-item" onclick="logout()">🚪 Выйти</a>
+                {% else %}
+                    <a href="/login" class="mobile-menu-item">🔑 Войти</a>
+                    <a href="#" class="mobile-menu-item btn-primary" onclick="showAuthModal()">🎲 Начать</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Девиз дня -->
+    {% if daily_motto %}
+    <div class="daily-motto">
+        <div class="container">
+            <div class="motto-container">
+                <div class="motto-icon">📜</div>
+                <div class="motto-content">
+                    <h4>Девиз дня</h4>
+                    <p>{{ daily_motto }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Сообщения -->
+            <div class="messages-container" id="messages-container"></div>
+
+            <!-- Контент страницы -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>D&D Forge</h4>
+                    <p>Создавайте уникальные шаблоны персонажей для настольных ролевых игр</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Быстрые ссылки</h4>
+                    <a href="/gallery">Галерея</a>
+                    <a href="/about">О проекте</a>
+                    <a href="/faq">FAQ</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Сообщество</h4>
+                    <a href="/community">Форум</a>
+                    <a href="/discord">Discord</a>
+                    <a href="/rules">Правила</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 D&D Template Forge. Все права защищены.</p>
+                <p class="legal-note">
+                    Dungeons & Dragons, D&D являются товарными знаками Wizards of the Coast LLC
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальное окно аутентификации -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-backdrop" onclick="closeModal('auth-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Вход в Таверну</h3>
+                <button class="modal-close" onclick="closeModal('auth-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="username">Имя героя (необязательно):</label>
+                        <input type="text" id="username" name="username"
+                               placeholder="Арагорн, Гэндальф...">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Совиная почта (необязательно):</label>
+                        <input type="email" id="email" name="email"
+                               placeholder="wizard@tower.com">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        🎲 Войти в таверну
+                    </button>
+                </form>
+                <p class="auth-note">
+                    Ваше устройство будет запомнено на 30 дней
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/mobile.js"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // Глобальные функции
+        function showAuthModal() {
+            document.getElementById('auth-modal').classList.add('active');
+        }
+
+        function logout() {
+            fetch('/api/users/logout', { method: 'POST' })
+                .then(() => window.location.href = '/');
+        }
+    </script>
+</body>
+</html>
