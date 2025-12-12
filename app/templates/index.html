@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Template Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap">
+</head>
+<body class="medieval-theme">
+    <div class="container">
+        <!-- Навигация -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>⚔️ D&D Template Forge</h1>
+            </div>
+            <div class="nav-links">
+                {% if user %}
+                    <a href="/dashboard" class="nav-link">Моя мастерская</a>
+                    <a href="/gallery" class="nav-link">Галерея</a>
+                    <a href="/profile" class="nav-link">Профиль</a>
+                    {% if user.role == "admin" %}
+                        <a href="/admin" class="nav-link admin-link">⚡ Админ</a>
+                    {% endif %}
+                {% else %}
+                    <a href="/gallery" class="nav-link">Галерея шаблонов</a>
+                    <button onclick="showAuthModal()" class="btn btn-primary">Войти в таверну</button>
+                {% endif %}
+            </div>
+        </nav>
+
+        <!-- Девиз дня -->
+        <div class="daily-motto">
+            <div class="scroll-parchment">
+                <h3>📜 Девиз дня от Мастера:</h3>
+                <p class="motto-text">{{ daily_motto }}</p>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <section class="hero-section">
+                <h2>Куй свою легенду!</h2>
+                <p>Создай уникальные листы персонажей для D&D 5e с помощью нашего мастера шаблонов</p>
+                {% if user %}
+                    <a href="/editor" class="btn btn-large btn-magic">✨ Создать новый шаблон</a>
+                {% else %}
+                    <button onclick="showAuthModal()" class="btn btn-large btn-magic">🎲 Начать приключение</button>
+                {% endif %}
+            </section>
+
+            <!-- Популярные шаблоны -->
+            <section class="featured-templates">
+                <h3>🔥 Популярные творения</h3>
+                <div class="template-grid">
+                    {% for template in public_templates %}
+                    <div class="template-card">
+                        <div class="template-preview">
+                            <!-- Здесь будет превью шаблона -->
+                        </div>
+                        <div class="template-info">
+                            <h4>{{ template.name }}</h4>
+                            <p class="template-author">Автор: {{ template.owner }}</p>
+                            <div class="template-stats">
+                                <span class="likes">❤️ {{ template.likes }}</span>
+                                <span class="class-badge">{{ template.character_class }}</span>
+                            </div>
+                            <a href="/template/{{ template.id }}" class="btn btn-small">Просмотреть</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+
+        <!-- Футер -->
+        <footer class="footer">
+            <p>D&D Template Forge © 2024 | Для истинных искателей приключений</p>
+            <p class="footer-note">Это неофициальный фанатский проект. Dungeons & Dragons, D&D являются товарными знаками Wizards of the Coast LLC</p>
+        </footer>
+    </div>
+
+    <!-- Модальное окно аутентификации -->
+    <div id="authModal" class="modal">
+        <div class="modal-content parchment">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <h3>Вход в Таверну</h3>
+            <p>Оставь след в истории, странник!</p>
+
+            <div class="auth-form">
+                <div class="form-group">
+                    <label for="authUsername">Имя героя (необязательно):</label>
+                    <input type="text" id="authUsername" placeholder="Арагорн, Гэндальф...">
+                </div>
+                <div class="form-group">
+                    <label for="authEmail">Совиная почта (необязательно):</label>
+                    <input type="email" id="authEmail" placeholder="wizard@tower.com">
+                </div>
+                <button onclick="authenticate()" class="btn btn-primary btn-block">🎲 Войти в таверну</button>
+                <p class="auth-note">Твое устройство будет запомнено на 30 дней</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
