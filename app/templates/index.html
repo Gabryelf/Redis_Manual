@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Template Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/static/images/hero-bg.jpg');
+            background-size: cover;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #e94560;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e94560;
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .template-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .template-card:hover {
+            transform: translateY(-5px);
+        }
+        .template-preview {
+            height: 150px;
+            background: linear-gradient(135deg, #0f3460, #1a1a2e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .template-info {
+            padding: 1rem;
+        }
+        .template-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .template-author {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+        .motto {
+            background: rgba(233, 69, 96, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            border-left: 4px solid #e94560;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                {% if user %}
+                    <a href="/dashboard" class="nav-link">🏠 Мастерская</a>
+                    <a href="/editor" class="nav-link">✨ Создать</a>
+                    <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+                    <a href="#" onclick="logout()" class="btn btn-secondary">🚪 Выйти</a>
+                {% else %}
+                    <a href="/gallery" class="nav-link">🎨 Галерея</a>
+                    <a href="#" onclick="showAuthModal()" class="btn btn-primary">🎲 Начать</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Девиз дня -->
+        {% if daily_motto %}
+        <div class="motto">
+            <h3>📜 Девиз дня:</h3>
+            <p>{{ daily_motto }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Герой секция -->
+        <div class="hero">
+            <h1>Куй свою легенду!</h1>
+            <p>Создавайте уникальные шаблоны персонажей для D&D 5e</p>
+            {% if user %}
+                <a href="/editor" class="btn btn-primary btn-large">✨ Создать шаблон</a>
+            {% else %}
+                <button onclick="showAuthModal()" class="btn btn-primary btn-large">🎲 Начать приключение</button>
+            {% endif %}
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats">
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.total_templates }}</span>
+                <span class="stat-label">Шаблонов создано</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.total_users }}</span>
+                <span class="stat-label">Искателей приключений</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">5e</span>
+                <span class="stat-label">Поддержка D&D</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">🎨</span>
+                <span class="stat-label">Гибкий редактор</span>
+            </div>
+        </div>
+
+        <!-- Популярные шаблоны -->
+        <h2>🔥 Популярные творения</h2>
+        <div class="template-grid">
+            {% for template in public_templates %}
+            <div class="template-card">
+                <div class="template-preview">
+                    <div style="text-align: center;">
+                        <h4>{{ template.name|truncate(20) }}</h4>
+                        <p>{{ template.character_class|default('Воин') }}</p>
+                    </div>
+                </div>
+                <div class="template-info">
+                    <div class="template-title">{{ template.name|truncate(30) }}</div>
+                    <div class="template-author">Автор: {{ template.owner }}</div>
+                    <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                        <a href="/template/{{ template.id }}" class="btn btn-secondary">👁️ Просмотреть</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if public_templates|length == 0 %}
+        <div style="text-align: center; padding: 3rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
+            <h3>🚀 Будьте первым!</h3>
+            <p>Создайте первый шаблон персонажа для D&D</p>
+            {% if user %}
+                <a href="/editor" class="btn btn-primary">✨ Создать шаблон</a>
+            {% else %}
+                <button onclick="showAuthModal()" class="btn btn-primary">🎲 Начать сейчас</button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Модальное окно аутентификации -->
+    <div id="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a2e; padding: 2rem; border-radius: 10px; max-width: 400px; width: 90%;">
+            <h2 style="margin-bottom: 1rem;">Вход в Таверну</h2>
+            <form id="auth-form">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Имя героя (необязательно):</label>
+                    <input type="text" name="username" placeholder="Арагорн, Гэндальф..." style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Совиная почта (необязательно):</label>
+                    <input type="email" name="email" placeholder="wizard@tower.com" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">🎲 Войти в таверну</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7; text-align: center;">
+                Ваше устройство будет запомнено на 30 дней
+            </p>
+            <button onclick="closeAuthModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+    </div>
+
+    <script>
+        // Функции для модального окна
+        function showAuthModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+        
+        function logout() {
+            fetch('/api/users/logout', { method: 'POST' })
+                .then(() => window.location.href = '/');
+        }
+        
+        // Обработка формы входа
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/users/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    window.location.href = result.redirect || '/';
+                } else {
+                    alert(result.message || 'Ошибка входа');
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        });
+        
+        // Закрытие модального окна при клике вне его
+        document.getElementById('auth-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAuthModal();
+            }
+        });
+    </script>
+</body>
+</html>

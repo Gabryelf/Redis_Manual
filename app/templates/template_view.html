@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ template.name }} - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .template-meta {
+            display: flex;
+            gap: 1rem;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        .template-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .attributes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .attribute-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .attribute-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        .attribute-name {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .combat-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .combat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 5px;
+        }
+        .sidebar-section {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .comments-section {
+            margin-top: 3rem;
+        }
+        .comment {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/dashboard" class="nav-link">📊 Мастерская</a>
+                <a href="/gallery" class="nav-link">🎨 Галерея</a>
+                {% if user %}
+                <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Заголовок шаблона -->
+        <div class="template-header">
+            <div>
+                <h2>{{ template.name }}</h2>
+                <div class="template-meta">
+                    <span>👤 {{ template.owner }}</span>
+                    <span>🎭 {{ template.character_class|default('Воин') }}</span>
+                    <span>📅 {{ template.created_at|default('Недавно') }}</span>
+                    {% if template.level %}<span>⭐ Уровень {{ template.level }}</span>{% endif %}
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                {% if user and user.username == template.owner %}
+                <a href="/editor/{{ template.id }}" class="btn btn-secondary">✏️ Редактировать</a>
+                {% endif %}
+                <a href="/dashboard" class="btn btn-secondary">← Назад</a>
+            </div>
+        </div>
+
+        <!-- Описание -->
+        {% if template.description %}
+        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 0.5rem;">📖 Описание</h3>
+            <p>{{ template.description }}</p>
+        </div>
+        {% endif %}
+
+        <div class="template-content">
+            <!-- Основной контент -->
+            <div>
+                <!-- Атрибуты -->
+                <h3>📊 Характеристики</h3>
+                <div class="attributes-grid">
+                    <div class="attribute-card">
+                        <div class="attribute-value">
+                            {% if template.content.attributes.str %}{{ template.content.attributes.str }}{% else %}10{% endif %}
+                        </div>
+                        <div class="attribute-name">Сила (STR)</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">
+                            Модификатор: {% if template.content.attributes.str %}{% set mod = ((template.content.attributes.str - 10)//2) %}{% if mod >= 0 %}+{% endif %}{{ mod }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <div class="attribute-value">
+                            {% if template.content.attributes.dex %}{{ template.content.attributes.dex }}{% else %}10{% endif %}
+                        </div>
+                        <div class="attribute-name">Ловкость (DEX)</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">
+                            Модификатор: {% if template.content.attributes.dex %}{% set mod = ((template.content.attributes.dex - 10)//2) %}{% if mod >= 0 %}+{% endif %}{{ mod }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <div class="attribute-value">
+                            {% if template.content.attributes.con %}{{ template.content.attributes.con }}{% else %}10{% endif %}
+                        </div>
+                        <div class="attribute-name">Телосложение (CON)</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">
+                            Модификатор: {% if template.content.attributes.con %}{% set mod = ((template.content.attributes.con - 10)//2) %}{% if mod >= 0 %}+{% endif %}{{ mod }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <div class="attribute-value">
+                            {% if template.content.attributes.int %}{{ template.content.attributes.int }}{% else %}10{% endif %}
+                        </div>
+                        <div class="attribute-name">Интеллект (INT)</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">
+                            Модификатор: {% if template.content.attributes.int %}{% set mod = ((template.content.attributes.int - 10)//2) %}{% if mod >= 0 %}+{% endif %}{{ mod }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <div class="attribute-value">
+                            {% if template.content.attributes.wis %}{{ template.content.attributes.wis }}{% else %}10{% endif %}
+                        </div>
+                        <div class="attribute-name">Мудрость (WIS)</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">
+                            Модификатор: {% if template.content.attributes.wis %}{% set mod = ((template.content.attributes.wis - 10)//2) %}{% if mod >= 0 %}+{% endif %}{{ mod }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="attribute-card">
+                        <div class="attribute-value">
+                            {% if template.content.attributes.cha %}{{ template.content.attributes.cha }}{% else %}10{% endif %}
+                        </div>
+                        <div class="attribute-name">Харизма (CHA)</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem;">
+                            Модификатор: {% if template.content.attributes.cha %}{% set mod = ((template.content.attributes.cha - 10)//2) %}{% if mod >= 0 %}+{% endif %}{{ mod }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Боевые параметры -->
+                <h3 style="margin-top: 2rem;">⚔️ Боевые параметры</h3>
+                <div class="combat-stats">
+                    <div class="combat-card">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Класс брони</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">
+                            {% if template.content.combat.ac %}{{ template.content.combat.ac }}{% else %}10{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="combat-card">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Инициатива</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">
+                            {% if template.content.combat.initiative %}{% if template.content.combat.initiative >= 0 %}+{% endif %}{{ template.content.combat.initiative }}{% else %}+0{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="combat-card">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Скорость</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">
+                            {% if template.content.combat.speed %}{{ template.content.combat.speed }}{% else %}30 футов{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="combat-card">
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Хиты</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">
+                            {% if template.content.combat.hp %}{{ template.content.combat.hp }}{% else %}10{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- История персонажа -->
+                {% if template.content.backstory %}
+                <div style="margin-top: 2rem;">
+                    <h3>📖 История персонажа</h3>
+                    <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 10px; margin-top: 1rem;">
+                        {{ template.content.backstory|nl2br }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Боковая панель -->
+            <div>
+                <!-- Информация о владельце -->
+                <div class="sidebar-section">
+                    <h3 style="margin-bottom: 1rem;">👤 Автор</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #e94560, #ff7b54); display: flex; align-items: center; justify-content: center;">
+                            {{ owner_info.username|first|upper if owner_info else template.owner|first|upper }}
+                        </div>
+                        <div>
+                            <div style="font-weight: bold;">{{ owner_info.username if owner_info else template.owner }}</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Создатель шаблона</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Действия -->
+                <div class="sidebar-section">
+                    <h3 style="margin-bottom: 1rem;">🎯 Действия</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button onclick="likeTemplate()" class="btn {% if user_liked %}btn-primary{% else %}btn-secondary{% endif %}" style="width: 100%;">
+                            {% if user_liked %}❤️ Вам нравится{% else %}🤍 Нравится{% endif %}
+                            <span style="margin-left: 0.5rem;">{{ likes }}</span>
+                        </button>
+
+                        {% if user %}
+                            {% if not in_collection %}
+                            <button onclick="collectTemplate()" class="btn btn-secondary" style="width: 100%;">⭐ Добавить в коллекцию</button>
+                            {% else %}
+                            <button class="btn btn-secondary" style="width: 100%;" disabled>✓ В коллекции</button>
+                            {% endif %}
+
+                            {% if user.username != template.owner %}
+                            <button onclick="cloneTemplate()" class="btn btn-secondary" style="width: 100%;">📋 Клонировать</button>
+                            {% endif %}
+                        {% else %}
+                            <button onclick="showAuthModal()" class="btn btn-secondary" style="width: 100%;">🎲 Войти, чтобы сохранить</button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Теги -->
+                {% if template.tags and template.tags|length > 0 %}
+                <div class="sidebar-section">
+                    <h3 style="margin-bottom: 1rem;">🏷️ Теги</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% for tag in template.tags %}
+                        <span style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.9rem;">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Комментарии -->
+        <div class="comments-section">
+            <h3>💬 Комментарии ({{ comments|length }})</h3>
+
+            {% if user %}
+            <div style="margin: 1.5rem 0;">
+                <textarea id="comment-text" placeholder="Оставьте комментарий..." style="width: 100%; padding: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white; min-height: 100px;"></textarea>
+                <button onclick="addComment()" class="btn btn-primary" style="margin-top: 1rem;">💬 Отправить</button>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 1.5rem 0;">
+                <p>Войдите, чтобы оставлять комментарии</p>
+                <button onclick="showAuthModal()" class="btn btn-primary">🎲 Войти в систему</button>
+            </div>
+            {% endif %}
+
+            <!-- Список комментариев -->
+            <div id="comments-list">
+                {% for comment in comments %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <span style="font-weight: bold;">{{ comment.author }}</span>
+                        <span>{{ comment.created_at|default('Только что') }}</span>
+                    </div>
+                    <div>{{ comment.text }}</div>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; opacity: 0.7;">
+                    Комментариев пока нет. Будьте первым!
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно аутентификации -->
+    <div id="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a2e; padding: 2rem; border-radius: 10px; max-width: 400px; width: 90%;">
+            <h2 style="margin-bottom: 1rem;">Вход в Таверну</h2>
+            <form id="auth-form">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Имя героя (необязательно):</label>
+                    <input type="text" name="username" placeholder="Арагорн, Гэндальф..." style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Совиная почта (необязательно):</label>
+                    <input type="email" name="email" placeholder="wizard@tower.com" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">🎲 Войти в таверну</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7; text-align: center;">
+                Ваше устройство будет запомнено на 30 дней
+            </p>
+            <button onclick="closeAuthModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+    </div>
+
+    <script>
+        // Функции для модального окна
+        function showAuthModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        // Лайк шаблона
+        async function likeTemplate() {
+            {% if not user %}
+                showAuthModal();
+                return;
+            {% endif %}
+
+            try {
+                const method = {% if user_liked %}'DELETE'{% else %}'POST'{% endif %};
+                const response = await fetch('/api/templates/{{ template.id }}/like', {
+                    method: method
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Ошибка соединения');
+            }
+        }
+
+        // Добавление в коллекцию
+        async function collectTemplate() {
+            {% if not user %}
+                showAuthModal();
+                return;
+            {% endif %}
+
+            try {
+                const response = await fetch('/api/templates/{{ template.id }}/collect', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Добавлено в коллекцию!');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Ошибка');
+                }
+            } catch (error) {
+                alert('Ошибка соединения');
+            }
+        }
+
+        // Клонирование шаблона
+        async function cloneTemplate() {
+            if (!confirm('Создать копию этого шаблона в своей мастерской?')) {
+                return;
+            }
+
+            // Здесь будет логика клонирования
+            alert('Функция клонирования в разработке...');
+        }
+
+        // Добавление комментария
+        async function addComment() {
+            const text = document.getElementById('comment-text').value.trim();
+
+            if (!text) {
+                alert('Введите текст комментария');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/templates/{{ template.id }}/comment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('comment-text').value = '';
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка соединения');
+            }
+        }
+
+        // Обработка формы входа
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/users/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = result.redirect || window.location.href;
+                } else {
+                    alert(result.message || 'Ошибка входа');
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        });
+    </script>
+</body>
+</html>

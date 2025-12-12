@@ -1,0 +1,373 @@
+/* app/static/css/responsive.css */
+
+/* Мобильные устройства (до 768px) */
+@media (max-width: 768px) {
+    /* Контейнер */
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* Навигация */
+    .navbar .container {
+        padding: 0 15px;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+        width: 30px;
+        height: 25px;
+        position: relative;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .mobile-menu-btn span {
+        display: block;
+        width: 100%;
+        height: 3px;
+        background: white;
+        margin: 5px 0;
+        transition: 0.3s;
+        border-radius: 3px;
+    }
+
+    .mobile-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: rgba(26, 26, 46, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .mobile-menu-item {
+        display: block;
+        padding: 15px;
+        color: white;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 1.1rem;
+    }
+
+    .mobile-menu-item:last-child {
+        border-bottom: none;
+    }
+
+    .mobile-menu-item.btn-primary {
+        background: linear-gradient(45deg, #e94560, #ff7b54);
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 10px;
+        border: none;
+    }
+
+    /* Герой секция */
+    .hero-section {
+        padding: 2rem 1rem;
+        margin: 0 -15px;
+        border-radius: 0;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        padding: 0 1rem;
+    }
+
+    /* Шаблоны */
+    .template-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .template-card {
+        margin-bottom: 1rem;
+    }
+
+    .template-preview {
+        height: 150px;
+    }
+
+    /* Формы */
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+
+    /* Кнопки */
+    .btn-large {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+
+    /* Футер */
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    /* Редактор */
+    .editor-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .toolbar-group {
+        margin-bottom: 10px;
+    }
+
+    /* Админ панель */
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Профиль */
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+    }
+
+    .profile-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Планшеты (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .template-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mobile-menu-btn {
+        display: none;
+    }
+}
+
+/* Маленькие мобильные (до 480px) */
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .template-info {
+        padding: 15px;
+    }
+
+    .template-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .template-actions .btn {
+        width: 100%;
+    }
+
+    /* Модальные окна */
+    .modal-content {
+        padding: 15px;
+    }
+
+    /* Формы */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-input {
+        padding: 12px;
+        font-size: 16px; /* Увеличиваем для мобильных */
+    }
+
+    /* Навигация */
+    .logo-text {
+        font-size: 1rem;
+    }
+}
+
+/* Портретная ориентация */
+@media (orientation: portrait) {
+    .editor-container {
+        flex-direction: column;
+    }
+
+    .editor-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .editor-main {
+        height: 60vh;
+    }
+}
+
+/* Ландшафтная ориентация */
+@media (orientation: landscape) and (max-height: 500px) {
+    .navbar {
+        padding: 0.5rem 0;
+    }
+
+    .hero-section {
+        padding: 1rem 0;
+    }
+
+    .template-preview {
+        height: 120px;
+    }
+}
+
+/* Высокий DPI экраны */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo {
+        font-size: 1.5rem;
+    }
+
+    .hero-title {
+        font-weight: 700;
+    }
+}
+
+/* Темная тема для мобильных */
+@media (prefers-color-scheme: dark) {
+    body:not(.light-theme) {
+        background: #0a0a14;
+    }
+}
+
+/* Поддержка сенсорных жестов */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px; /* Минимальная высота для касания */
+        min-width: 44px;  /* Минимальная ширина для касания */
+    }
+
+    .nav-link {
+        padding: 12px;
+    }
+
+    .like-btn, .collect-btn {
+        padding: 12px;
+    }
+
+    /* Увеличиваем области касания для мобильных */
+    .touch-target {
+        padding: 15px;
+        margin: -15px;
+    }
+}
+
+/* Адаптивные типографика */
+@media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.3rem; }
+    h4 { font-size: 1.1rem; }
+    p, li { font-size: 1rem; }
+}
+
+/* Адаптивные отступы */
+@media (max-width: 768px) {
+    .section-padding {
+        padding: 2rem 1rem;
+    }
+
+    .card-padding {
+        padding: 1rem;
+    }
+
+    .button-group {
+        gap: 10px;
+    }
+}
+
+/* Оптимизация для медленных сетей */
+@media (prefers-reduced-data: reduce) {
+    * {
+        background-image: none !important;
+    }
+
+    .hero-section {
+        background: #1a1a2e !important;
+    }
+}
+
+/* Анимации для мобильных */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Безопасные зоны для iPhone X и выше */
+@supports (padding: max(0px)) {
+    .safe-area-top {
+        padding-top: max(15px, env(safe-area-inset-top));
+    }
+
+    .safe-area-bottom {
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+    }
+
+    .safe-area-left {
+        padding-left: max(15px, env(safe-area-inset-left));
+    }
+
+    .safe-area-right {
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}

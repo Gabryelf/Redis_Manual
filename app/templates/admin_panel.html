@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель - D&D Forge</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .admin-header {
+            background: rgba(233, 69, 96, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #e94560;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+            display: block;
+        }
+        .admin-section {
+            margin-bottom: 3rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .danger-zone {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        th {
+            background: rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🐉 D&D Forge</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Главная</a>
+                <a href="/dashboard" class="nav-link">📊 Мастерская</a>
+                <a href="/profile" class="nav-link">👤 {{ user.username }}</a>
+                <a href="#" onclick="logout()" class="btn btn-secondary">🚪 Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="admin-header">
+            <h2>⚡ Административная панель</h2>
+            <p>Добро пожаловать, {{ user.username }}! Вы вошли как {{ user.role }}.</p>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.total_users }}</span>
+                <span>Пользователей</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.total_templates }}</span>
+                <span>Шаблонов</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.banned_users }}</span>
+                <span>Забанено</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.public_templates }}</span>
+                <span>Публичных</span>
+            </div>
+        </div>
+
+        <!-- Управление девизом дня -->
+        <div class="admin-section">
+            <h3>📜 Девиз дня</h3>
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 10px; margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Текущий девиз:</label>
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 5px;">{{ daily_motto|default('Добро пожаловать!') }}</div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Новый девиз:</label>
+                    <input type="text" id="new-motto" placeholder="Введите новый девиз..." style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; color: white;">
+                </div>
+
+                <button onclick="updateMotto()" class="btn btn-primary">💾 Обновить девиз</button>
+            </div>
+        </div>
+
+        <!-- Последние пользователи -->
+        <div class="admin-section">
+            <h3>👥 Последние пользователи</h3>
+            {% if recent_users|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Дата регистрации</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email|default('—') }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>{{ user.created_at|default('—') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; opacity: 0.7;">
+                Пользователей пока нет
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Последние шаблоны -->
+        <div class="admin-section">
+            <h3>📝 Последние шаблоны</h3>
+            {% if recent_templates|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Автор</th>
+                        <th>Класс</th>
+                        <th>Дата создания</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for template in recent_templates %}
+                    <tr>
+                        <td>{{ template.name }}</td>
+                        <td>{{ template.owner }}</td>
+                        <td>{{ template.character_class|default('—') }}</td>
+                        <td>{{ template.created_at|default('—') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; opacity: 0.7;">
+                Шаблонов пока нет
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Опасная зона (только для админов) -->
+        {% if is_admin %}
+        <div class="danger-zone">
+            <h3 style="color: #e74c3c;">⚡ Суперадмин функции</h3>
+
+            <div class="action-buttons">
+                <button onclick="promoteUser()" class="btn" style="background: #e94560; color: white;">👑 Назначить администратора</button>
+                <button onclick="manageBans()" class="btn" style="background: #e74c3c; color: white;">🚫 Управление банами</button>
+                <button onclick="systemStats()" class="btn btn-secondary">📊 Системная статистика</button>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+        function logout() {
+            fetch('/api/users/logout', { method: 'POST' })
+                .then(() => window.location.href = '/');
+        }
+
+        async function updateMotto() {
+            const motto = document.getElementById('new-motto').value.trim();
+
+            if (!motto) {
+                alert('Введите текст девиза');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/motto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ motto: motto })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Девиз обновлен!');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка соединения');
+            }
+        }
+
+        function promoteUser() {
+            const username = prompt('Введите имя пользователя для назначения администратором:');
+            if (!username) return;
+
+            const adminCode = prompt('Введите код администратора:');
+            if (!adminCode) return;
+
+            fetch('/api/admin/promote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    role: 'admin',
+                    admin_code: adminCode
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Пользователь повышен до администратора!');
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(error => {
+                alert('Ошибка соединения');
+            });
+        }
+
+        function manageBans() {
+            alert('Управление банами в разработке...');
+        }
+
+        function systemStats() {
+            alert('Системная статистика в разработке...');
+        }
+    </script>
+</body>
+</html>

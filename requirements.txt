@@ -1,0 +1,37 @@
+# Основные зависимости
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+redis==5.0.1
+python-dotenv==1.0.0
+jinja2==3.1.2
+python-multipart==0.0.6
+
+# Для работы с изображениями
+Pillow==10.1.0
+reportlab==4.0.4
+
+# Для экспорта
+pdfkit==1.0.0  # Требует установки wkhtmltopdf
+qrcode[pil]==7.4.2
+
+# Для безопасности
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Для работы с датами
+python-dateutil==2.8.2
+
+# Для кэширования
+aiocache==0.12.0
+
+# Утилиты
+colorama==0.4.6
+tqdm==4.66.1
+
+# Разработка
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.1
+
+# Для деплоя
+gunicorn==21.2.0
