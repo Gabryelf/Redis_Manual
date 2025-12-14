@@ -52,8 +52,8 @@
 
 ```bash
 # Клонирование репозитория
-git clone https://github.com/yourusername/dnd-issues-creator.git
-cd dnd-issues-creator
+git clone https://github.com/Gabryelf/DND_Forge.git
+cd DND_Forge
 
 # Установка зависимостей
 pip install -r requirements.txt
