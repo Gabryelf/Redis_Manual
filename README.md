@@ -14,13 +14,14 @@
 
 ## 📸 Скриншоты
 
-| Интерфейс управления репозиториями | Создание Issue с шаблоном |
+| Главное меню | Создание шаблона |
 |-----------------------------------|----------------------------|
-| ![Управление репозиториями](https://via.placeholder.com/600x400/0d1117/238636?text=Repository+Dashboard) | ![Создание Issue](https://via.placeholder.com/600x400/0d1117/6e40c9?text=Template+Selection) |
+| ![Управление репозиториями](docs/screens/v0.0.2/2025-12-13_00-01-54.png) | ![Создание Issue](docs/screens/v0.0.2/2025-12-13_00-01-03.png) |
 
-| Предпросмотр Markdown | История активности |
+| Коллекции | Настройки аккунта |
 |-----------------------|---------------------|
-| ![Предпросмотр](https://via.placeholder.com/600x400/0d1117/8b949e?text=Markdown+Preview) | ![Активность](https://via.placeholder.com/600x400/0d1117/da3633?text=Activity+Log) |
+| ![Предпросмотр](docs/screens/v0.0.2/2025-12-13_00-01-29.png) | ![Активность](docs/screens/v0.0.2/2025-12-13_00-14-49.png) |
+| ![Предпросмотр](docs/screens/v0.0.2/2025-12-13_00-12-19.png) | |
 
 ---
 
@@ -51,8 +52,8 @@
 
 ```bash
 # Клонирование репозитория
-git clone https://github.com/yourusername/dnd-issues-creator.git
-cd dnd-issues-creator
+git clone https://github.com/Gabryelf/DND_Forge.git
+cd DND_Forge
 
 # Установка зависимостей
 pip install -r requirements.txt
